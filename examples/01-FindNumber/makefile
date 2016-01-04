@@ -11,7 +11,7 @@ clean :
 	@rm -f *.o *~
 	
 example :
-	@g++ -std=c++11 -Wall -O3 -o example main.cpp
+	@g++ -std=c++11 -Wall -O3 -pthread -o example main.cpp
 	
 start :
 	@./example
