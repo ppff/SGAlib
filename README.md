@@ -25,7 +25,7 @@ One way to do this is to follow these instructions:
 3. Implement the 2 functions `randomType()` and `score()`
 4. Optionally implement the `print()` function
 5. Copy the library (*sga.hpp*) next to *genetic_algorithm.cpp* (or another include path)
-6. Don't forget to enable C++11 support for your compiler (-std=c++11 for GCC)
+6. Don't forget to enable C++11 support for your compiler (`-std=c++11` for GCC)
 
 ### License
 
@@ -38,6 +38,7 @@ This libray is licensed under the Do What The Fuck You Want Public License.
 * Make an example without known solution
 * Add novelty search
 * Add algorithm clusters
+* Add pictures to readme
 
 ## Understanding genetic algorithms
 
@@ -88,7 +89,7 @@ This is the same thing as roulette wheel selection except that instead of having
 TL;DR: randomly pick multiple individuals at the same time but still with more probability for better individuals.
 
 **Tournament selection**  
-In tournament selection, we randomly choose a few individuals and keep the best one of them.
+In tournament selection, we randomly choose a few individuals and keep the best one of them.  
 TL;DR: really?  
 Comment: note that if the tournament size is 1, it is actually not the same thing as roulette wheel selection because all the individuals have the same probability to be selected for the tournament.
 
