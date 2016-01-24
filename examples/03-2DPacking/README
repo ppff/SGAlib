@@ -1,0 +1,13 @@
+This example shows how GAs can solve a classic NP-hard problem: 2D bin packing.
+The objective is to pack a set of rectangles as tight as possible (ie. having the smallest bounding box).
+
+A set of rectangles is generated when the program starts.
+A gene is a pair of coordinates corresponding to the upper left corner of a rectangle. 
+Since every chromosome has the same size than the number of rectangles, a chromosome describes the positions of all the rectangles.
+The score function is made so that a chromosome is better if its bounding box is smaller. 
+By running the GA, we eventually end up with a (probably non-optimal) solution to the problem.
+
+Note that this program was made with Qt5. The easiest thing to do is to open the .pro file with QtCreator.
+About the library, it is a good example of how the non-blocking mode can be used.
+
+Also note that you have to stop the algorithm yourself when you think the packing is good enough.
