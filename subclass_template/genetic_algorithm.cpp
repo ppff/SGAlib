@@ -18,6 +18,7 @@ class GA : public SGA::GeneticAlgorithm<Gene>
 		virtual Gene randomGene() const override
 		{
 			//your code here
+			//think of SGA::Random::get(min, max) etc
 		}
 		
 		//Compute the fitness score of a chromosome
@@ -27,7 +28,7 @@ class GA : public SGA::GeneticAlgorithm<Gene>
 		}
 		
 		//OPTIONAL: chromosome to string (useful if you enable logging)
-		virtual std::string print(SGA::Chromosome<Gene const & chromosome) const override
+		virtual std::string print(SGA::Chromosome<Gene> const & chromosome) const override
 		{
 			//your code here, if you want/need
 		}

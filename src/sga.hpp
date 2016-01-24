@@ -19,6 +19,7 @@
 
 #ifndef DISABLE_NONBLOCKING_MODE
 	#include <thread>
+	#include <mutex>
 #endif
 
 namespace SGA
@@ -51,9 +52,10 @@ do \
 
 /* How to end the algorithm:
  *  - MaxScore: when the best chromosome from the population has a fitness score above _bestScore, the algorithm ends;
- *  - BestScore (default): when the best score doesn't get better during _steadyGenerations generations, the algorithm ends.
+ *  - BestScore (default): when the best score doesn't get better during _steadyGenerations generations, the algorithm ends;
+ *  - NeverStop: the algorithm will never stop (you will have to call stop()).
  */
-enum class EndingCriterion { MaxScore, BestScore };
+enum class EndingCriterion { MaxScore, BestScore, NeverStop };
 
 /* How to select chromosomes for the recombination operation:
  *  - RouletteWheel: randomly pick up a chromosome with a probability proportional to its fitness score (just like a roulette wheel but with bigger slots for better individuals);
@@ -141,6 +143,12 @@ class GeneticAlgorithm
 		//Set the chromosomes size
 		void setChromosomesSize(unsigned min, unsigned max); //Just enter the same number on min and max for a constant length
 		
+		/*---------------------------*/
+		/* Useful stuff for the user */
+		/*---------------------------*/
+		
+		unsigned getNumberOfGenerations() const;
+		
 		/*----------------------------------------------------*/
 		/* Functions which have to be implemented by the user */
 		/*----------------------------------------------------*/
@@ -184,6 +192,7 @@ class GeneticAlgorithm
 		std::deque<Score> 						_lastScores;	//Buffer used for BestScore ending criterion
 		bool 									_run;			//Boolean used to stop the algorithm if needed
 		unsigned								_generation;	//To keep track of the number of generations
+		std::mutex								_mutex;			//For thread safety
 		
 		/* Logging variables */
 		
@@ -324,7 +333,19 @@ void GeneticAlgorithm<T>::stop()
 template <typename T>
 Chromosome<T> GeneticAlgorithm<T>::best()
 {
-	return lastElement().second;
+	//This function could likely be called from another thread so let's be thread-safe
+	
+	#ifndef DISABLE_NONBLOCKING_MODE
+	_mutex.lock();
+	#endif
+	
+	Chromosome<T> best = _population.size() == 0 ? Chromosome<T>(0) : lastElement().second;
+		
+	#ifndef DISABLE_NONBLOCKING_MODE
+	_mutex.unlock();
+	#endif
+	
+	return best;
 }
 
 template <typename T>
@@ -367,6 +388,16 @@ void GeneticAlgorithm<T>::setChromosomesSize(unsigned min, unsigned max)
 	_maxChromosomeSize = max;
 }
 
+/*---------------------------*/
+/* Useful stuff for the user */
+/*---------------------------*/
+
+template <typename T>
+unsigned GeneticAlgorithm<T>::getNumberOfGenerations() const
+{
+	return _generation;
+}
+
 /*----------------*/
 /* Core functions */
 /*----------------*/
@@ -379,12 +410,20 @@ void GeneticAlgorithm<T>::evolve(Population<T> population)
 	{
 		/* 1. Verify we're not good enough */
 		
-		//Compute fitness
+		//Compute fitness (surrounded by the mutex in case we're trying to get the best individual when the _population is empty for example)
+		#ifndef DISABLE_NONBLOCKING_MODE
+		_mutex.lock();
+		#endif
+		
 		_population.clear();
 		for (Chromosome<T> const & chromosome : population)
 		{
 			_population.insert( std::pair<Score, Chromosome<T> >(score(chromosome), chromosome) );
 		}
+		
+		#ifndef DISABLE_NONBLOCKING_MODE
+		_mutex.unlock();
+		#endif
 		
 		//Log results
 		LOG("Generation " << _generation << ": best fitness score is " << lastElement().first << " (" << print(lastElement().second) << ")");
@@ -475,6 +514,10 @@ bool GeneticAlgorithm<T>::isEvolutionOver()
 		//If yes, continue, otherwise, we have reached the end of the evolution
 		return !better;
 	}
+	else if (_endCriterion == EndingCriterion::NeverStop)
+	{
+		return false;
+	}
 	else
 	{
 		throw std::runtime_error("Unknown ending criterion");
@@ -553,6 +596,21 @@ Population<T> GeneticAlgorithm<T>::cross(Population<T> const & chromosomes) cons
 	
 	//Get the size of the smallest chromosome
 	unsigned sizeOfSmallest = std::min(chromosomes[0].size(), chromosomes[1].size());
+
+
+	/* TEST */
+	
+	/*unsigned cross = Random::get((unsigned)1, sizeOfSmallest-1);
+	
+	Chromosome<T> first(chromosomes[1].begin(), chromosomes[1].begin()+cross);
+	Chromosome<T> second(chromosomes[0].begin(), chromosomes[0].begin()+cross);
+	
+	first.insert(std::prev(first.end()), chromosomes[1].begin() + cross, chromosomes[1].end());
+	second.insert(std::prev(second.end()), chromosomes[0].begin() + cross, chromosomes[0].end());
+	
+	return {first, second};*/
+	
+	/*------*/
 
 	//Select genes to exchange
 	std::vector<unsigned> genesToExchange; 

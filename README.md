@@ -25,7 +25,7 @@ One way to do this is to follow these instructions:
 3. Implement the 2 functions `randomType()` and `score()`
 4. Optionally implement the `print()` function
 5. Copy the library (*sga.hpp*) next to *genetic_algorithm.cpp* (or another include path)
-6. Don't forget to enable C++11 support for your compiler (`-std=c++11` for GCC)
+6. Don't forget to enable C++11 support for your compiler (`-std=c++11` for GCC) and link to `-pthread` (if you use the non-blocking option)
 
 ### License
 
@@ -35,7 +35,7 @@ This libray is licensed under the Do What The Fuck You Want Public License.
 
 * Finish test
 * Finish example 2
-* Make an example without known solution
+* Finish example 3
 * Add novelty search
 * Add algorithm clusters
 * Add pictures to readme
@@ -142,13 +142,14 @@ There are a few parameters which allow you to easily customize the algorithm:
  * `SGA::SelectionType::Tournament`. Note that if you choose the tournament selection, you will have to provide numberOfChromosomesForTournament which will define the size of the tournament (the number of chromosomes that are selected for each tournament).
 * The **ending criterion**: set it with `setEndingCriterion(EndingCriterion type, Score maxScoreForMaxScoreCriterion, unsigned numberOfGenerationsWithoutImprovementForBestScoreCriterion)`. There are 2 available criterions: 
  * `SGA::EndingCriterion::MaxScore`: the algorithm runs until it reaches the score given by `maxScoreForMaxScoreCriterion`
- * `SGA::EndingCriterion::BestScore`. the algorithm stops when the score of the best indivual hasn't improved in `numberOfGenerationsWithoutImprovementForBestScoreCriterion` generations
+ * `SGA::EndingCriterion::BestScore` the algorithm stops when the score of the best indivual hasn't improved in `numberOfGenerationsWithoutImprovementForBestScoreCriterion` generations
+ * `SGA::EndingCriterion::NeverStop`: the algorithm only stops when the user calls `stop()`
 
 The defaults are:
 
  * a population of 100
  * a mutation rate of 0.01
- * a size between 1 and 100
+ * a chromosome size between 1 and 100
  * tournament selection with 10 individuals
  * best score ending criterion with 10 maximum generations
 
